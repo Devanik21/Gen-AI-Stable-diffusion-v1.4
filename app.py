@@ -16,7 +16,7 @@ output_folder = "generated_images"
 os.makedirs(output_folder, exist_ok=True)
 
 # Hugging Face token (add yours here or load from .env / secrets)
-HF_TOKEN = "your_huggingface_token_here"  # 🔐 Replace this with your real token
+HF_TOKEN = "zzz"  # 🔐 Replace this with your real token
 
 # Load the model once in session
 @st.cache_resource
