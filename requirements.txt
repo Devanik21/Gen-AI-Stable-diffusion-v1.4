@@ -1,5 +1,6 @@
 streamlit
-torch
-transformers
-diffusers
-accelerate
+google-generativeai
+Pillow
+protobuf
+requests
+python-dotenv
