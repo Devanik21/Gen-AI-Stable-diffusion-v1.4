@@ -3,7 +3,7 @@ import os
 import base64
 import io
 from PIL import Image
-from google import genai
+import google.generativeai as genai
 from google.genai import types
 from google.api_core import retry
 
