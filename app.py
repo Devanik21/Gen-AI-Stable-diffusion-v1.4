@@ -4,7 +4,7 @@ import base64
 import io
 from PIL import Image
 import google.generativeai as genai
-from google.genai import types
+from google.generativeai import types
 from google.api_core import retry
 
 # Setup page config
