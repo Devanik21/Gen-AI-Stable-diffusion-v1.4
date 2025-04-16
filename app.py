@@ -3,7 +3,7 @@ from PIL import Image
 from io import BytesIO
 import google.generativeai as genai
 
-# Load your Google API key securely 💫
+# Securely load the API key 💫
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 # Initialize Gemini model
@@ -16,13 +16,14 @@ st.title("🎨 Gemini Image Generator")
 st.write("Describe your idea and watch it come to life ✨")
 
 # Prompt input
-user_prompt = st.text_input("Enter your prompt below:")
+user_prompt = st.text_input("📝 Enter your image prompt:")
 
-if st.button("Generate Image ✨") and user_prompt:
+if st.button("✨ Generate Image") and user_prompt:
     with st.spinner("Generating your magical image..."):
+        # Generate content with image modality
         generation_response = model.generate_content(
             contents=user_prompt,
-            generation_config={"response_mime_type": ["text", "image"]}
+            response_modalities=["text", "image"]
         )
 
         image_bytes = None
@@ -36,7 +37,7 @@ if st.button("Generate Image ✨") and user_prompt:
 
         if image_bytes:
             image = Image.open(BytesIO(image_bytes))
-            st.image(image, caption="Generated Image ✨", use_column_width=True)
+            st.image(image, caption="🖼️ Generated Image", use_column_width=True)
 
             # Download button
             buffered = BytesIO()
@@ -48,7 +49,7 @@ if st.button("Generate Image ✨") and user_prompt:
                 mime="image/png"
             )
         else:
-            st.error("Oops! No image was generated. Try a different prompt?")
+            st.error("Oops! No image was generated. Maybe try a different prompt?")
 
     if description:
         st.markdown("**Model Notes:**")
