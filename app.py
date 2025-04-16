@@ -7,7 +7,7 @@ import google.generativeai as genai
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 # Use the dedicated image generation model
-model = genai.GenerativeModel("models/imagegeneration")
+model = genai.GenerativeModel("gemini-2.0-flash-exp-image-generation")
 
 st.set_page_config(page_title="Gemini Image Generator", page_icon="🖼️")
 st.title("🎨 Gemini Image Generator")
