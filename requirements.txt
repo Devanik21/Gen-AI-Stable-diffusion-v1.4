@@ -1,6 +1,5 @@
 streamlit
 Pillow
 google-generativeai
-google-genai==1.9.0
-google-api-core
-gTTS
+
+
