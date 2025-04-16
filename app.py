@@ -2,9 +2,8 @@ import streamlit as st
 from PIL import Image
 from io import BytesIO
 import google.generativeai as genai
-from google.generativeai.types import GenerateContentConfig
 
-# Load your Google API key from secrets
+# Load your Google API key securely 💫
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 # Initialize Gemini model
@@ -23,9 +22,7 @@ if st.button("Generate Image ✨") and user_prompt:
     with st.spinner("Generating your magical image..."):
         generation_response = model.generate_content(
             contents=user_prompt,
-            config=GenerateContentConfig(
-                response_modalities=["text", "image"]
-            )
+            generation_config={"response_mime_type": ["text", "image"]}
         )
 
         image_bytes = None
