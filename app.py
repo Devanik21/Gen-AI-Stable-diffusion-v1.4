@@ -1,51 +1,58 @@
 import streamlit as st
-import os
-import io
 from PIL import Image
+from io import BytesIO
 import google.generativeai as genai
-from google.generativeai import types
-from google.api_core import retry
+from google.generativeai.types import GenerateContentConfig
 
-# Configure your API key
-api_key = st.secrets["GOOGLE_API_KEY"] if "GOOGLE_API_KEY" in st.secrets else os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=api_key)
+# Load your Google API key from secrets
+genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
-# Optional retry setup (not strictly necessary here)
-is_retriable = lambda e: (hasattr(e, 'code') and e.code in {429, 503})
-genai.GenerativeModel.generate_content = retry.Retry(predicate=is_retriable)(genai.GenerativeModel.generate_content)
+# Initialize Gemini model
+model = genai.GenerativeModel(
+    model_name="gemini-2.0-flash-exp-image-generation"
+)
 
-st.title("✨ GenAI Image Generator")
-st.write("Create magical images with your imagination 💖")
+st.set_page_config(page_title="Gemini Image Generator", page_icon="🎨")
+st.title("🎨 Gemini Image Generator")
+st.write("Describe your idea and watch it come to life ✨")
 
-# Inputs
-character = st.text_input("Character", value="naruto")
-style = st.text_input("Style", value="realistic")
-scene = st.text_input("Scene", value="sunset behind the hills, palm trees")
+# Prompt input
+user_prompt = st.text_input("Enter your prompt below:")
 
-if st.button("Generate Image"):
-    prompt = f"Can you create a {style} image of {character} couple in a {scene}?"
+if st.button("Generate Image ✨") and user_prompt:
+    with st.spinner("Generating your magical image..."):
+        generation_response = model.generate_content(
+            contents=user_prompt,
+            config=GenerateContentConfig(
+                response_modalities=["text", "image"]
+            )
+        )
 
-    with st.spinner("Summoning your GenAI artwork... 🧚‍♀️"):
-        try:
-            model = genai.GenerativeModel("gemini-2.0-flash-exp-image-generation")
-            response = model.generate_content(prompt, stream=False)
+        image_bytes = None
+        description = ""
 
-            image_data = None
-            for part in response.parts:
-                if hasattr(part, "inline_data") and hasattr(part.inline_data, "data"):
-                    image_data = part.inline_data.data
-                    break
+        for part in generation_response.candidates[0].content.parts:
+            if hasattr(part, "text") and part.text:
+                description += part.text
+            elif hasattr(part, "inline_data") and part.inline_data:
+                image_bytes = part.inline_data.data
 
-            if image_data:
-                file_path = "generated_image.png"
-                with open(file_path, "wb") as f:
-                    f.write(image_data)
+        if image_bytes:
+            image = Image.open(BytesIO(image_bytes))
+            st.image(image, caption="Generated Image ✨", use_column_width=True)
 
-                st.success("Yay! Image saved 💾")
-                with open(file_path, "rb") as f:
-                    st.download_button("Download Image", f, file_name="generated_image.png", mime="image/png")
-            else:
-                st.error("Hmm... no image returned. Try another prompt maybe? 🥺")
+            # Download button
+            buffered = BytesIO()
+            image.save(buffered, format="PNG")
+            st.download_button(
+                label="💾 Download Image",
+                data=buffered.getvalue(),
+                file_name="generated_image.png",
+                mime="image/png"
+            )
+        else:
+            st.error("Oops! No image was generated. Try a different prompt?")
 
-        except Exception as e:
-            st.error(f"Oopsie! Something went wrong: {e}")
+    if description:
+        st.markdown("**Model Notes:**")
+        st.write(description)
