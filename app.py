@@ -3,44 +3,39 @@ from PIL import Image
 from io import BytesIO
 import google.generativeai as genai
 
-# Configure Gemini with your API key securely 🔐
+# Secure API key setup
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
-# Load the Gemini image generation model
-model = genai.GenerativeModel("gemini-2.0-flash-exp-image-generation")
+# Use the dedicated image generation model
+model = genai.GenerativeModel("models/imagegeneration")
 
-st.set_page_config(page_title="Gemini Image Generator", page_icon="🎨")
+st.set_page_config(page_title="Gemini Image Generator", page_icon="🖼️")
 st.title("🎨 Gemini Image Generator")
-st.write("Describe your idea and let Gemini paint it into reality ✨")
+st.write("Enter a creative prompt and let Gemini turn it into art ✨")
 
 # Prompt input
-user_prompt = st.text_input("📝 Enter your image prompt:")
+user_prompt = st.text_input("💡 Your image prompt:")
 
-if st.button("✨ Generate Image") and user_prompt:
-    with st.spinner("Crafting your visual masterpiece..."):
+if st.button("Generate 🪄") and user_prompt:
+    with st.spinner("Generating your image... hang tight!"):
         try:
-            # Just pass the prompt — no special configs needed!
-            generation_response = model.generate_content(user_prompt)
+            response = model.generate_content(user_prompt)
 
-            image_bytes = None
-            for part in generation_response.parts:
+            # Attempt to grab inline image data
+            image_data = None
+            for part in response.parts:
                 if hasattr(part, "inline_data") and part.inline_data:
-                    image_bytes = part.inline_data.data
+                    image_data = part.inline_data.data
 
-            if image_bytes:
-                image = Image.open(BytesIO(image_bytes))
-                st.image(image, caption="🖼️ Your Generated Image", use_column_width=True)
+            if image_data:
+                image = Image.open(BytesIO(image_data))
+                st.image(image, caption="Here’s your masterpiece! 🖼️", use_column_width=True)
 
-                # Prepare download
-                buffered = BytesIO()
-                image.save(buffered, format="PNG")
-                st.download_button(
-                    label="💾 Download Image",
-                    data=buffered.getvalue(),
-                    file_name="gemini_generated.png",
-                    mime="image/png"
-                )
+                # Allow download
+                buf = BytesIO()
+                image.save(buf, format="PNG")
+                st.download_button("💾 Download", data=buf.getvalue(), file_name="gemini_image.png", mime="image/png")
             else:
-                st.error("Hmm... No image came back. Wanna try a different prompt?")
+                st.error("Hmm... No image was generated. Try being more specific or imaginative 💭")
         except Exception as e:
-            st.error(f"Something went wrong: {e}")
+            st.error(f"Yikes! Something went wrong: {e}")
